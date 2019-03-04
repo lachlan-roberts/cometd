@@ -15,7 +15,7 @@
  */
 package org.cometd.websocket.server;
 
-import java.util.ArrayList;
+import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -27,9 +27,6 @@ import org.cometd.bayeux.server.ServerMessage;
 import org.cometd.server.BayeuxServerImpl;
 import org.cometd.websocket.server.common.AbstractBayeuxContext;
 import org.cometd.websocket.server.common.AbstractWebSocketTransport;
-import org.eclipse.jetty.websocket.api.WebSocketPolicy;
-import org.eclipse.jetty.websocket.api.extensions.ExtensionConfig;
-import org.eclipse.jetty.websocket.server.NativeWebSocketConfiguration;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 
@@ -52,6 +49,8 @@ public class JettyWebSocketTransport extends AbstractWebSocketTransport {
             throw new IllegalArgumentException("Missing '" + COMETD_URL_MAPPING_OPTION + "' parameter");
         }
 
+        // TODO: uncomment and fix this code
+        /*
         NativeWebSocketConfiguration wsConfig = (NativeWebSocketConfiguration)context.getAttribute(NativeWebSocketConfiguration.class.getName());
         if (wsConfig == null) {
             throw new IllegalArgumentException("Missing WebSocketConfiguration");
@@ -105,6 +104,7 @@ public class JettyWebSocketTransport extends AbstractWebSocketTransport {
                 return null;
             });
         }
+        */
     }
 
     protected Object newWebSocketEndPoint(BayeuxContext bayeuxContext) {
@@ -122,9 +122,10 @@ public class JettyWebSocketTransport extends AbstractWebSocketTransport {
         private final Map<String, Object> attributes;
 
         private WebSocketContext(ServletContext context, ServletUpgradeRequest request) {
-            super(context, request.getRequestURI().toString(), request.getQueryString(), request.getHeaders(),
+            // TODO: review casts to InetSocketAddress
+            super(context, request.getRequestURI().toString(), request.getQueryString(), request.getHeadersMap(),
                     request.getParameterMap(), request.getUserPrincipal(), request.getSession(),
-                    request.getLocalSocketAddress(), request.getRemoteSocketAddress(),
+                    (InetSocketAddress)request.getLocalSocketAddress(), (InetSocketAddress)request.getRemoteSocketAddress(),
                     Collections.list(request.getLocales()), "HTTP/1.1", request.isSecure());
             this.attributes = request.getServletAttributes();
         }

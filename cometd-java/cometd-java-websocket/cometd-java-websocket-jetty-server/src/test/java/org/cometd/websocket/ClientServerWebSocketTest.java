@@ -37,8 +37,8 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
-import org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter;
+import org.eclipse.jetty.websocket.javax.server.JavaxWebSocketServletContainerInitializer;
+import org.eclipse.jetty.websocket.server.JettyWebSocketServletContainerInitializer;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.rules.TestWatcher;
@@ -130,10 +130,10 @@ public abstract class ClientServerWebSocketTest {
 
         switch (wsTransportType) {
             case WEBSOCKET_JSR_356:
-                WebSocketServerContainerInitializer.configureContext(context);
+                JavaxWebSocketServletContainerInitializer.configureContext(context);
                 break;
             case WEBSOCKET_JETTY:
-                WebSocketUpgradeFilter.configureContext(context);
+                JettyWebSocketServletContainerInitializer.configure(context);
                 break;
             default:
                 throw new IllegalArgumentException();
@@ -168,15 +168,15 @@ public abstract class ClientServerWebSocketTest {
         httpClient = new HttpClient();
         switch (wsTransportType) {
             case WEBSOCKET_JSR_356:
+                // TODO: how to set the httpclient for the javax container
                 wsClientContainer = ContainerProvider.getWebSocketContainer();
-                httpClient.addBean(wsClientContainer, true);
+                httpClient.addBean(wsClientContainer, true); // TODO: do we actually use this by adding it as a bean
                 break;
             case WEBSOCKET_JETTY:
                 QueuedThreadPool wsThreadPool = new QueuedThreadPool();
-                wsThreadPool.setName("client");
-                wsClient = new WebSocketClient();
-                wsClient.setExecutor(wsThreadPool);
-                httpClient.addBean(wsClient);
+                wsThreadPool.setName("client"); // TODO: why are we setting custom ThreadPool
+                httpClient.setExecutor(wsThreadPool);
+                wsClient = new WebSocketClient(httpClient);
                 break;
             default:
                 throw new IllegalArgumentException();
